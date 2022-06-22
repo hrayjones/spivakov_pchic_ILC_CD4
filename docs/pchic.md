@@ -1,5 +1,7 @@
 # pcHi-C
 
+___
+
 The data were provided from two different analysis methods:
 
 * fragments - full restriction fragments are used
@@ -8,17 +10,27 @@ The data were provided from two different analysis methods:
 
 The notebook [`20220606_spivakov_pchic_reanalysis.ipynb`](notebooks/20220606_spivakov_pchic_reanalysis.ipynb) describes how the pcHi-C and ABC model results were combined to create unique feature files.
 
+___
+
 ## Filtering Criteria
 
-The filtering used is based on converstation between Tareian Cazares and Valerya Malysheva in June 2022.
+The filtering used is based on conversatation between Tareian Cazares and Valerya Malysheva in June 2022.
 
-* We remove trans-chromosomal interactions.
+### Trans-chromosomal Interactions
+
+We remove trans-chromosomal interactions.
   
-> Removing trans-chromosomal interactions can be achieved by removing the NA distance values. 
+> Removing trans-chromosomal interactions can be achieved by removing the NA distance values.
 
-* We remove distance with Na values. In my original filtering I do not remove dist = 0.
+We make sure to remove the trans-chromosomal interactions by remove any rows in our data frame that have where the bait chromosome is different from the oe chromosome.
+
+### Self interacting regions
+
+* We remove rows that have a distance with Na values. In my original filtering I do not remove dist = 0.
 
 > There should be no interactions with dist = 0 in the Chicago peak matrices. The Capture Hi-C-adapted ABC analysis can generate pairs with dist = 0 and I should have removed those already from the peak matrices that I sent you, but it wouldn’t harm to remove again in your pipeline just in case.
+
+### Filtering by CHiCAGO score
 
 * We keep lines with a CHiCAGO score >= 5.
 
@@ -28,14 +40,53 @@ The filtering used is based on converstation between Tareian Cazares and Valerya
 
 > For the CD4+ data I have now run CHiCAGO on 4 replicates (two reps for 1M and two reps for 50K). So, for filtering you should just use either the score scolumn (in case of the CHiCAGO peakmatrix) and merged_score column (in case of the CHiCAGO_ABC peakmatrix). So there is no need to look at the scores in previous peakmatrices.
 
+The scores column name changes based on the input analysis and date of the analysis. The funciton I wrote will look for the column name if given and filter by the specific threshold.
+
+### Remove Line column
+
 * Some files have a column “remove_line”. Should I use this column for filtering as opposed to filtering on my end?
 
 > Please ignore the remove_line column.
+
+### Off target interactions
 
 * There used to be an off-target category in the OEName, but I have not seen them in the new files. Do we need to worry about those?
 
 > Don’t worry about the off-targets in the OEName column.
 
+We will remove the off target interactions for the baits and keep the off target interactions for the OEs.
+
+### Promoter to promoter interactions
+
 * We at one point included promoter-to-promoter interactions then excluded them.
 
 > The promoter-promoter interactions should be removed for the RELI analysis. Have you noticed any difference for when you run with and without these interactions?
+
+To remove promoter to promoter interactions I removed rows with OEnames. This might not be the best approach. 
+
+I also found all unique bait intervals and removed rows where the promoter interval was found.
+___
+
+## Workflow Overview
+
+### Imports
+```python
+import pandas as pd
+import numpy as np
+```
+
+### Functions
+
+I wrote a python class object to work with the CHiCAGO output text file. This piece of code will perform filtering of specific types of interactions, like promoter-to-promoter, or trans-chromosomal interactions.
+
+Example:
+
+```python
+input_file = "/Users/caz3so/scratch/20220606_spivakov_pchic_reanalysis/TransferXL-089FGscZhgKG8/ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm.txt"
+
+ILC3_data = ChicagoData(input_file)
+
+ILC3_data.df(input_file, dropna=True, drop_off_target=True, drop_p2p=False, drop_trans_chrom=True)
+
+ILC3_data.pir_df
+```

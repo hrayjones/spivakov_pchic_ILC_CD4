@@ -31,12 +31,14 @@ tx2gene <- read_csv(file.path("/Users/caz3so/scratch/20200620_hILC3_pchic/hg38_t
 
 txi <- tximport(files, type="salmon", tx2gene=tx2gene, ignoreTxVersion=TRUE, countsFromAbundance = "lengthScaledTPM")
 
+# Ensure that all columns are the same order
 all(colnames(txi$counts) == rownames(sample))
 
 coldata <- samples
 coldata$files <- files
 coldata$names <- coldata$run
 
+# Create the DESeq data set from Tximport data
 ddsTxi <- DESeqDataSetFromTximport(txi,
                                    colData = samples,
                                    design = ~ CellType)
@@ -48,8 +50,10 @@ ddsTxi <- ddsTxi[keep,]
 
 Gene_counts = counts(ddsTxi)
 
+# Plot the PCA for QC
 plotPCA(vsd, intgroup=c("CellType", "Replicate"))
 
+# Write the data to a file
 write.table(Gene_counts, file="/Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/RNAseq/20200706_hILC3_CD4_GeneCounts.tsv", sep="\t", quote=F, col.names=NA)
 
 ddsTxi <- DESeq(ddsTxi)

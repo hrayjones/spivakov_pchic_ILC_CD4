@@ -1,4 +1,9 @@
 # ATAC-seq
 
-1) I obtained ILC3 ATAC-seq data from [GSE77299](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE130775) and CD4+ ATAC-seq data was gathered from [PRJNA380283](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5623106/).
-2) The CD4+ ATAC-seq data was mapped to hg19 so UCSC liftover was used to convert the ATAC-seq data to hg38. 
+Data were downloaded and processed to Tn5 cut sites using the snakemake pipeline used for [maxATAC](https://github.com/tacazares/snakeATAC).
+
+| Sample    | Accession   | Publication Link                                                         |
+|-----------|-------------|--------------------------------------------------------------|
+| ILC3 ATAC | GSE77299    | [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE130775) |
+| CD4 ATAC  | PRJNA380283 | [link](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5623106)  |
+
