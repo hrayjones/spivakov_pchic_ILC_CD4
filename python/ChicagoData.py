@@ -5,11 +5,10 @@ Import and filter Chicago results
 import pandas as pd
 
 class ChicagoData(object):
-    """Import CHICACO data
+    """Import CHiCAGO data
     """
     def __init__(self,
                  filename: str,
-                 dropna: bool = True,
                  drop_off_target_bait: bool = True,
                  drop_off_target_oe: bool = True,
                  drop_trans_chrom: bool = True,
@@ -21,14 +20,11 @@ class ChicagoData(object):
 
         Args:
             filename (str): Input CHICAGO txt file
-            dropna (bool, optional): Drop the interactions with NA. Defaults to =True.
             drop_off_target (bool, optional): Drop off target interactions. Defaults to =True.
             drop_trans_chrom (bool, optional): Drop transchromosomal interactions. Defaults to =True.
         """
         # Set filename to the input filename
         self.filename = filename
-        # Set whether to drop na interactions
-        self.dropna = dropna
         # Set whether to drop off target baits
         self.drop_off_target_bait = drop_off_target_bait
         # Set whether to drop off target oe
@@ -50,9 +46,15 @@ class ChicagoData(object):
         
         # Filter the formatted DF
         self._filter_file_()
-
+        
         # Get the PIR df
         self._get_PIR_df_()
+        
+        # Get the bait df
+        self._get_bait_df_()
+        
+        # Get the combined df
+        self._get_combined_df_()
         
     def _read_file_(self):
         """Read in original file
@@ -70,24 +72,30 @@ class ChicagoData(object):
         df["baitChr"] = "chr" + df["baitChr"].apply(str)
         df["oeChr"] = "chr" + df["oeChr"].apply(str)
         
-        # Create an ID column that can be used to track the intervals
-        df["ID"] = df["baitChr"] + ":" + \
-                   df["baitStart"].apply(str) + "-" + \
-                   df["baitEnd"].apply(str) + "_" + \
-                   df["oeChr"] + ":" + \
+        df["oe_interval_ID"] = df["oeChr"] + ":" + \
                    df["oeStart"].apply(str) + "-" + \
                    df["oeEnd"].apply(str)
 
+        df["bait_interval_ID"] = df["baitChr"] + ":" + \
+                   df["baitStart"].apply(str) + "-" + \
+                   df["baitEnd"].apply(str)
+
+        df["interaction_ID"] = df["bait_interval_ID"] + "_" + df["oe_interval_ID"].apply(str)
+        
         # Set the variable to the formatted df
+        self.bait_ID = df["baitID"].unique()
+        
+        self.oe_ID = df["oeID"].unique()
+
+        self.bait_interval_ID = df["bait_interval_ID"].unique()
+        
+        self.oe_interval_ID = df["oe_interval_ID"].unique()
+
         self.df = df
-    
+
     def _filter_file_(self):
         """Filter the formatted CHICAGO results
         """
-        # There should not be any NA values in this column, but we will double check
-        if self.dropna:
-            self.df.dropna(subset=["dist"], inplace=True)
-
         # Drop the off target baits
         if self.drop_off_target_bait:
             self.df[self.df["baitName"] != "off_target"]
@@ -98,6 +106,12 @@ class ChicagoData(object):
 
         # Drop the trans chromosomal interactions
         if self.drop_trans_chrom:
+            self.df = self.df[self.df["dist"] != "."]
+                        
+            self.df = self.df[self.df["dist"].apply(float) != 0]
+
+            self.df = self.df.dropna(subset=["dist"])
+
             self.df = self.df[self.df["baitChr"] == self.df["oeChr"]]
 
         # Filter the specific score column by a specific value
@@ -107,13 +121,26 @@ class ChicagoData(object):
         # Drop promoter to promoter interactions
         if self.remove_p2p:
             self.df = self.df[self.df.oeName == "."]
+            
+            self.df = self.df[~self.df.oe_interval_ID.isin(self.bait_interval_ID)]
         
     def _get_PIR_df_(self):
         """Get a DF of all PIR interactions
         """
-        self.pir_df = self.df[["oeChr", "oeStart", "oeEnd", "OE_width"]].drop_duplicates(subset=["oeChr", "oeStart", "oeEnd"], keep="first")
+        self.pir_df = self.df[["oeChr", "oeStart", "oeEnd", "oe_interval_ID"]].drop_duplicates(subset=["oeChr", "oeStart", "oeEnd"], keep="first")
+        
+    def _get_bait_df_(self):
+        """Get a DF of baits
+        """
+        self.bait_df = self.df[["baitChr", "baitStart", "baitEnd", "bait_interval_ID"]].drop_duplicates(subset=["baitChr", "baitStart", "baitEnd"], keep="first")
+        
+    def _get_combined_df_(self):
+        """Get a comined DF
+        """
+        tmp_df = self.pir_df.copy()
+        tmp_df2 = self.bait_df.copy()
 
-    def write_PIR_bed(self, output_filename): 
-        """Write PIRs from the filtered CHICAGO results to a bed file
-        """       
-        self.pir_df.to_csv(output_filename, sep="\t", header=False, index=False)
+        tmp_df.columns = ["Chr", "Start", "Stop", "ID"]
+        tmp_df2.columns = ["Chr", "Start", "Stop", "ID"]
+
+        self.unique_features = pd.concat([tmp_df, tmp_df2])

@@ -8,7 +8,7 @@ The data were provided from two different analysis methods:
 
 * 5kb bin level - interactions are approximately 5k bins instead of the size of restriction fragments
 
-The notebook [`20220606_spivakov_pchic_reanalysis.ipynb`](notebooks/20220606_spivakov_pchic_reanalysis.ipynb) describes how the pcHi-C and ABC model results were combined to create unique feature files.
+The notebook [`20220606_spivakov_pchic_reanalysis.ipynb`](notebooks/20220606_spivakov_pchic_reanalysis.ipynb) describes how the pcHi-C and ABC model results were combined to create feature files.
 
 ___
 
@@ -69,24 +69,47 @@ ___
 
 ## Workflow Overview
 
-### Imports
-```python
-import pandas as pd
-import numpy as np
-```
+### Convert the files to PIR `.bed` files
 
-### Functions
-
-I wrote a python class object to work with the CHiCAGO output text file. This piece of code will perform filtering of specific types of interactions, like promoter-to-promoter, or trans-chromosomal interactions.
+I wrote a python [class object](../python/ChicagoData.py) to work with the CHiCAGO output text file. This piece of code will perform filtering of specific types of interactions, like promoter-to-promoter, or trans-chromosomal interactions.
 
 Example:
 
 ```python
+import pandas as pd
+import numpy as np
+import ChicagoData
+
 input_file = "/Users/caz3so/scratch/20220606_spivakov_pchic_reanalysis/TransferXL-089FGscZhgKG8/ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm.txt"
 
 ILC3_data = ChicagoData(input_file)
 
-ILC3_data.df(input_file, dropna=True, drop_off_target=True, drop_p2p=False, drop_trans_chrom=True)
-
+ILC3_data = ChicagoData(input_file, 
+                        drop_off_target_bait=True, 
+                        drop_off_target_oe=False, 
+                        drop_trans_chrom=True,
+                        score_col="merged_score",
+                        score_val=5,
+                        remove_p2p=True)
+                        
 ILC3_data.pir_df
+```
+
+### Intersect PIR `.bed` files with ChIP-seq `.bed` files
+
+```bash
+for PIR_BED in ${PIR_DIR}/CD4*bed;
+    do
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/CD4/Primary_CD4_ATAC.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapATAC.bed
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/CD4/S008H1H1.ERX547940.H3K27ac.bwa.GRCh38.20150527.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapH3K27ac.bed
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/CD4/S008H1H1.ERX547958.H3K4me3.bwa.GRCh38.20150527.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapH3K4me3.bed
+    done
+
+for PIR_BED in ${PIR_DIR}/hILC*bed;
+    do
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/ILC3/SRR3129113_end2end_final_blacklisted_IS_peaks.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapATAC.bed
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/ILC3/ILC3_H3K27ac_peaks.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapH3K27ac.bed
+        bedtools intersect -a ${PIR_BED} -b /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/CHIP_ATAC/ILC3/ILC3_H3K4me3_peaks.bed -c > /Users/caz3so/scratch/20200629_Spivakov_pcHiC_analysis_summary/features/PIR_overlap/`basename ${PIR_BED} .bed`_overlapH3K4me3.bed
+    done
+    
 ```
