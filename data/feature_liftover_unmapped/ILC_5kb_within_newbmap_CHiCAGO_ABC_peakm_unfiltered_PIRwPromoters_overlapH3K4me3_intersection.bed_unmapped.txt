@@ -1,0 +1,12 @@
+#Split in new
+chr1	149636610	149636876
+#Partially deleted in new
+chr10	49941868	49942349
+#Deleted in new
+chr10	131901670	131901873
+#Partially deleted in new
+chr7	142786023	142786954
+#Deleted in new
+chr7	142786955	142791061
+#Partially deleted in new
+chr7	142795802	142797036

@@ -1,0 +1,12 @@
+#Deleted in new
+chr1	144546630	144546832
+#Deleted in new
+chr10	131901016	131901552
+#Partially deleted in new
+chr7	142786026	142786259
+#Deleted in new
+chr7	142795817	142796275
+#Deleted in new
+chrX	318513	318841
+#Deleted in new
+chrX	319427	319721

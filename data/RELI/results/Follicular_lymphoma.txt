@@ -1,0 +1,5 @@
+input	RELI_input	ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm_filtered_PIR_overlapRE_intersection	none	2	9	0.222222	0.682318	0.689186	1.91194	2.93119	0.0279419	0.167651	Null_Model_GWAS_SNP_SNPmatch	human
+input	RELI_input	CD4_1M_50K_5kb_within_newbmap_CHiCAGO_ABC_peakm_filtered_PIR_overlapRE_intersection	none	3	9	0.333333	0.924076	0.783728	2.64878	3.24649	0.00403913	0.0242348	Null_Model_GWAS_SNP_SNPmatch	human
+input	RELI_input	CD4_1M_50K_5kb_within_newbmap_CHiCAGO_peakm_unfiltered_PIRwPromoters_overlapRE_intersection	none	3	9	0.333333	0.78022	0.753424	2.94625	3.84507	0.00160824	0.00964942	Null_Model_GWAS_SNP_SNPmatch	human
+input	RELI_input	CD4_1M_50K_5kb_within_newbmap_CHiCAGO_ABC_peakm_unfiltered_PIRwPromoters_overlapRE_intersection	none	3	9	0.333333	1.05694	0.862412	2.25305	2.83837	0.012128	0.072768	Null_Model_GWAS_SNP_SNPmatch	human
+input	RELI_input	CD4_1M_50K_5kb_within_newbmap_CHiCAGO_peakm_filtered_PIR_overlapRE_intersection	none	3	9	0.333333	0.811189	0.805801	2.71632	3.69828	0.00330062	0.0198037	Null_Model_GWAS_SNP_SNPmatch	human

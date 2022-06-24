@@ -1,0 +1,2 @@
+#Partially deleted in new
+chr7	142786026	142786259
