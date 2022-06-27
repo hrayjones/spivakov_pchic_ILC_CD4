@@ -1,2 +1,0 @@
-#Deleted in new
-chr22	49971218	49971317

@@ -7,5 +7,12 @@ This document will cover how RELI analysis was perfomed using the PIR features g
 ### Convert the hg38 PIRs to hg19 intervals using UCSC liftover
 
 ```bash
-
+# Lift over the hg38 bed files to hg19
+for file in /Users/caz3so/workspaces/tacazares/pchic/data/outputs/PIR_intersection/*;
+do
+liftover ${file} \
+./data/genome_inf/hg38ToHg19.over.chain.gz \
+./data/RELI/feature_liftover/`basename ${file}` \
+./data/RELI/feature_liftover_unmapped/`basename ${file}`_unmapped.txt
+done
 ```

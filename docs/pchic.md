@@ -82,57 +82,17 @@ import ChicagoData
 
 input_file = "/Users/caz3so/scratch/20220606_spivakov_pchic_reanalysis/TransferXL-089FGscZhgKG8/ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm.txt"
 
-ILC3_data = ChicagoData(input_file)
+# Import ILC3 data
+ilc3 = ChicagoData(ilc3_file, 
+                    drop_off_target_bait=True, 
+                    drop_off_target_oe=False, 
+                    drop_trans_chrom=True,
+                    score_col="merged_score",
+                    score_val=5,
+                    remove_p2p=True,
+                    features_to_count=ilc3_file_dict,
+                    gene_expression=ilc_gene_expression,
+                    output_dir=out_dir,
+                    output_basename="ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm")
 
-ILC3_data = ChicagoData(input_file, 
-                        drop_off_target_bait=True, 
-                        drop_off_target_oe=False, 
-                        drop_trans_chrom=True,
-                        score_col="merged_score",
-                        score_val=5,
-                        remove_p2p=True)
-                        
-ILC3_data.pir_df
-```
-
-### Intersect PIR `.bed` files with ChIP-seq `.bed` files to get the counts
-
-```bash
-for PIR_BED in /Users/caz3so/workspaces/tacazares/pchic/data/CHICAGO/hg38/PIR/CD4*bed.gz;
-    do
-        bedtools intersect -a ${PIR_BED} -b ../data/ATAC/CD4_ATAC_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapATAC.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/S008H1H1.ERX547940.H3K27ac.bwa.GRCh38.20150527.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K27ac.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/S008H1H1.ERX547958.H3K4me3.bwa.GRCh38.20150527.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K4me3.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/RE/CD4_RE.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapRE.bed
-    done
-
-for PIR_BED in /Users/caz3so/workspaces/tacazares/pchic/data/CHICAGO/hg38/PIR/ILC*bed.gz;
-    do
-        bedtools intersect -a ${PIR_BED} -b ../data/ATAC/ILC3_ATAC_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapATAC.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/ILC3_H3K27ac_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K27ac.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/ILC3_H3K4me3_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K4me3.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/RE/ILC3_RE.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapRE.bed
-    done
-```
-
-### Intersect the PIR with the genome features to refine the PIR set
-
-```bash
-for PIR_BED in ./data/CHICAGO/hg38/PIR/CD4*bed.gz;
-    do
-        base_filename=`basename ${PIR_BED} .bed.gz`
-        bedtools intersect -a ${PIR_BED} -b ./data/ATAC/CD4_ATAC_peaks.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapATAC_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/CHIP/S008H1H1.ERX547940.H3K27ac.bwa.GRCh38.20150527.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapH3K27ac_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/CHIP/S008H1H1.ERX547958.H3K4me3.bwa.GRCh38.20150527.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapH3K4me3_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/RE/CD4_RE.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapRE_intersection.bed
-    done
-
-for PIR_BED in ./data/CHICAGO/hg38/PIR/ILC*bed.gz;
-    do
-        base_filename=`basename ${PIR_BED} .bed.gz`
-        bedtools intersect -a ${PIR_BED} -b ./data/ATAC/ILC3_ATAC_peaks.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapATAC_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/CHIP/ILC3_H3K27ac_peaks.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapH3K27ac_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/CHIP/ILC3_H3K4me3_peaks.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapH3K4me3_intersection.bed
-        bedtools intersect -a ${PIR_BED} -b ./data/RE/ILC3_RE.bed.gz | cut -f1,2,3 | bedtools sort | bedtools merge > ./data/feature_intersection/${base_filename}_overlapRE_intersection.bed
-    done
 ```

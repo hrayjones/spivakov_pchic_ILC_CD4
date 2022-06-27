@@ -20,14 +20,23 @@ The analysis for each data type is describe below:
 
 ## Directory Description
 
-### `./notebooks`
+### [`./data`](./data)
+
+The `./data` diretory contains the input and output data produced with this repository. See the [data directry readme](./data/readme.md) for detailed description of files.
+
+
+### [`./notebooks`](./notebooks)
 
 The notebooks directory contains the jupyter notebooks used to perform the analysis. These notebooks are used interactively to generate the data.
 
-### `./python`
+### [`./python`](./python)
 
 The python notebook has all of the python code used to generate the feature files.
 
-### `./r`
+### [`./r`](./r)
 
 The `r` directory has the code for performing DESEQ2 analysis and plotting some data.
+
+### [`./docs`](./docs)
+
+The `./docs directory has the markdown files.
