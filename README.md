@@ -24,7 +24,6 @@ The analysis for each data type is describe below:
 
 The `./data` diretory contains the input and output data produced with this repository. See the [data directry readme](./data/readme.md) for detailed description of files.
 
-
 ### [`./notebooks`](./notebooks)
 
 The notebooks directory contains the jupyter notebooks used to perform the analysis. These notebooks are used interactively to generate the data.

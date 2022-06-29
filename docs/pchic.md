@@ -82,17 +82,22 @@ import ChicagoData
 
 input_file = "/Users/caz3so/scratch/20220606_spivakov_pchic_reanalysis/TransferXL-089FGscZhgKG8/ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm.txt"
 
+ilc3_file_dict = {"./pchic/data/peaks/ATAC/ILC3_ATAC_peaks.bed.gz": "ATAC",
+                  "./pchic/data/peaks/CHIP/ILC3_H3K27ac_peaks.bed.gz": "H3K27ac",
+                  "./pchic/data/peaks/CHIP/ILC3_H3K4me3_peaks.bed.gz": "H3K4me3",
+                  "./pchic/data/peaks/RE/ILC3_RE.bed.gz": "RE"}
+
 # Import ILC3 data
 ilc3 = ChicagoData(ilc3_file, 
-                    drop_off_target_bait=True, 
-                    drop_off_target_oe=False, 
-                    drop_trans_chrom=True,
-                    score_col="merged_score",
-                    score_val=5,
-                    remove_p2p=True,
-                    features_to_count=ilc3_file_dict,
-                    gene_expression=ilc_gene_expression,
-                    output_dir=out_dir,
-                    output_basename="ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm")
+                        drop_off_target_bait=True, 
+                        drop_off_target_oe=False, 
+                        drop_trans_chrom=True,
+                        score_col="merged_score",
+                        score_val=5,
+                        remove_p2p=True,
+                        features_to_count=ilc3_file_dict,
+                        gene_expression=ilc_gene_expression,
+                        output_dir=out_dir,
+                        output_basename="ILC_5kb_within_newbmap_CHiCAGO_ABC_peakm")
 
 ```

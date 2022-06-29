@@ -4,59 +4,43 @@ This document will walkthrough how I used gene expression data with pcHi-C data.
 
 ## Workflow Overview
 
-This analysis uses bash and python to perform the analysis. 
-
-### Intersect PIR with genetic features
-
-I used `bedtools intersect -c` to count the number of features that overlapped PIR intervals.
-
-```bash
-for PIR_BED in /Users/caz3so/workspaces/tacazares/pchic/data/CHICAGO/hg38/PIR/CD4*bed.gz;
-    do
-        bedtools intersect -a ${PIR_BED} -b ../data/ATAC/CD4_ATAC_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapATAC.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/S008H1H1.ERX547940.H3K27ac.bwa.GRCh38.20150527.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K27ac.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/S008H1H1.ERX547958.H3K4me3.bwa.GRCh38.20150527.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K4me3.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/RE/CD4_RE.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapRE.bed
-    done
-
-for PIR_BED in /Users/caz3so/workspaces/tacazares/pchic/data/CHICAGO/hg38/PIR/ILC*bed.gz;
-    do
-        bedtools intersect -a ${PIR_BED} -b ../data/ATAC/ILC3_ATAC_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapATAC.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/ILC3_H3K27ac_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K27ac.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/CHIP/ILC3_H3K4me3_peaks.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapH3K4me3.bed
-        bedtools intersect -a ${PIR_BED} -b ../data/RE/ILC3_RE.bed -c > ../data/PIR_overlap/`basename ${PIR_BED} .bed.gz`_overlapRE.bed
-    done
-    
-```
-
-### Import the data into python as a dictionaries
-
-Next we import the feature counts into python as a dictionary of `{feature: count}`.
+The code for generating the gene expression analysis is written into the `ChicagoData` python object. 
 
 ```python
-#ILC3
-ILC3_fragments_H3K27ac_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_fragments_PIR_overlapH3K27ac.bed")
-ILC3_bins_H3K27ac_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_5kbin_PIR_overlapH3K27ac.bed")
+# Read file into DF
+self._read_file_()
 
-ILC3_fragments_H3K4me3_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_fragments_PIR_overlapH3K4me3.bed")
-ILC3_bins_H3K4me3_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_5kbin_PIR_overlapH3K4me3.bed")
+# Format the DF
+self._format_file_()
 
-ILC3_fragments_ATAC_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_fragments_PIR_overlapATAC.bed")
-ILC3_bins_ATAC_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_5kbin_PIR_overlapATAC.bed")
+# Filter the formatted DF
+self._filter_file_()
 
-ILC3_fragments_RE_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_fragments_PIR_overlapRE.bed")
-ILC3_bins_RE_dict = utils.map_counts("./features/PIR_overlap/hILC3_10K_dpnII_5kbin_PIR_overlapRE.bed")
+# Get the PIR df
+self._get_PIR_df_()
 
-#CD4
-CD4_50K_dpnII_fragments_H3K27ac_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_fragments_PIR_overlapH3K27ac.bed")
-CD4_50K_dpnII_bins_H3K27ac_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_5kbin_PIR_overlapH3K27ac.bed")
+# Get the bait df
+self._get_bait_df_()
 
-CD4_50K_dpnII_fragments_H3K4me3_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_fragments_PIR_overlapH3K4me3.bed")
-CD4_50K_dpnII_bins_H3K4me3_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_5kbin_PIR_overlapH3K4me3.bed")
+# Get the combined df
+self._get_combined_df_()  
 
-CD4_50K_dpnII_fragments_ATAC_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_fragments_PIR_overlapATAC.bed")
-CD4_50K_dpnII_bins_ATAC_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_5kbin_PIR_overlapATAC.bed")
+# Get number of features overlapping PIRs using bedtools and report the count per PIR
+self._get_feature_counts_()
 
-CD4_50K_dpnII_fragments_RE_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_fragments_PIR_overlapRE.bed")
-CD4_50K_dpnII_bins_RE_dict = utils.map_counts("./features/PIR_overlap/CD4_50K_dpnII_5kbin_PIR_overlapRE.bed")
+# Import a 2 column gene expression table that is Gene Name, Gene Expression
+self._import_gene_counts_()
+
+# Map the the different counts back to the gene expression table. Count # of PIR 
+# attached to gene promoter. Sum the number of features overlapping PIRs.
+self._map_feature_counts_to_genes_()
+
+# Filter the expression matrix to remove NA 
+self._filter_expression_()
+
+# Get the count v mean gene expression matrix
+self._get_PIR_count_v_mean_()
+
+# Write the information
+self._write_new_chicago_data_()
 ```
