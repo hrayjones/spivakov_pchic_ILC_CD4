@@ -1,0 +1,30 @@
+#Partially deleted in new
+chr10	49941627	49941867
+#Partially deleted in new
+chr10	49941868	49942349
+#Partially deleted in new
+chr7	142786023	142786356
+#Deleted in new
+chr7	142786357	142786954
+#Deleted in new
+chr7	142786955	142787136
+#Deleted in new
+chr7	142787137	142788043
+#Deleted in new
+chr7	142788044	142788948
+#Deleted in new
+chr7	142788949	142789089
+#Deleted in new
+chr7	142789090	142789852
+#Deleted in new
+chr7	142789853	142790025
+#Deleted in new
+chr7	142790026	142790537
+#Deleted in new
+chr7	142790538	142791061
+#Deleted in new
+chr7	142795802	142796061
+#Deleted in new
+chr7	142796062	142796229
+#Partially deleted in new
+chr7	142796230	142797036
