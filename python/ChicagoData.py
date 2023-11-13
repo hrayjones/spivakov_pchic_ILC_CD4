@@ -18,15 +18,14 @@ class ChicagoData(object):
                  drop_off_target_bait: bool = True,
                  drop_off_target_oe: bool = True,
                  drop_trans_chrom: bool = True,
-                 score_col: str = None,
-                 score_val: int = 5,
                  remove_p2p: bool= True,
                  features_to_count: dict = {},
                  gene_expression: str = "",
                  nonzero_expression: bool = True,
                  dropna_expression: bool = True,
                  output_dir: str = "",
-                 output_basename: str = ""
+                 output_basename: str = "",
+                 chain_file: str = ""
                  ):
         """Initialize the object
 
@@ -50,7 +49,7 @@ class ChicagoData(object):
         # Get the combined df
         self._get_combined_df_()  
         
-        # Get the feature counts per PIR
+        # Get the feature counts per PIR and map to hg19
         self._get_feature_counts_()
         
         # Import the gene expression matrix
@@ -76,8 +75,6 @@ class ChicagoData(object):
             drop_off_target_bait (bool, optional): Drop off target baits. Defaults to True.
             drop_off_target_oe (bool, optional): Drop off target OE. Defaults to True.
             drop_trans_chrom (bool, optional): Drop trans chromosomal interactions. Defaults to True.
-            score_col (str, optional): Define the score column. Defaults to None.
-            score_val (int, optional): Filter the score . Defaults to 5.
             remove_p2p (bool, optional): _description_. Defaults to True.
             features_to_count (dict, optional): _description_. Defaults to {}.
             gene_expression (str, optional): _description_. Defaults to "".
@@ -94,10 +91,6 @@ class ChicagoData(object):
         self.drop_off_target_oe = drop_off_target_oe
         # Set whether to drop transchromosomal interactions
         self.drop_trans_chrom = drop_trans_chrom
-        # Score column name for filtering
-        self.score_col = score_col
-        # Score value threshold
-        self.score_val = score_val
         # Remove promoter to promoter interactions
         self.remove_p2p = remove_p2p
         # Map feature counts to PIR if provided
@@ -112,6 +105,8 @@ class ChicagoData(object):
         self.output_dir = output_dir
         # Set the output basename
         self.basename = output_basename
+        # Set the chain file
+        self.chainfile = chain_file
         
         # Read file into DF
         self._read_file_()
@@ -140,9 +135,6 @@ class ChicagoData(object):
         # Map the feature counts to genes in the expression matrix
         self._map_feature_counts_to_genes_()
         
-        # Map the ABC count or CHiCAGO count as a column in the gene expression matrix
-        self._map_ABC_counts_to_genes_()
-        
         # Filter the gene expression matrix file
         self._filter_expression_()
         
@@ -150,7 +142,7 @@ class ChicagoData(object):
         self._get_PIR_count_v_mean_()
         
         # Write the newly formatted CHiCAGO data to a file        
-        self._write_new_chicago_data_()
+        self._write_new_chicago_data_()        
                     
     def _read_file_(self):
         """Read in original file
@@ -201,8 +193,6 @@ class ChicagoData(object):
         
         # Find the unique OE ID
         self.oe_interval_ID = df["oe_interval_ID"].unique()
-
-        df["ABC_label"] = df["score"].apply(lambda score: "CHiCAGO" if score >= 5 else "ABC")
         
         self.df = df
         
@@ -219,22 +209,10 @@ class ChicagoData(object):
 
         # Drop the trans chromosomal interactions
         if self.drop_trans_chrom:
-            self.df = self.df[self.df["dist"] != "."]
-                        
-            self.df = self.df[self.df["dist"].apply(float) != 0]
-
-            self.df = self.df.dropna(subset=["dist"])
-
             self.df = self.df[self.df["baitChr"] == self.df["oeChr"]]
 
-        # Filter the specific score column by a specific value
-        if self.score_col:
-            self.df = self.df[self.df[self.score_col] >= self.score_val]
-            
         # Drop promoter to promoter interactions
-        if self.remove_p2p:
-            self.df = self.df[self.df.oeName == "."]
-            
+        if self.remove_p2p:            
             self.df = self.df[~self.df.oe_interval_ID.isin(self.bait_interval_ID)]
         
     def _get_PIR_df_(self):
@@ -295,6 +273,22 @@ class ChicagoData(object):
             self._get_dir_(output_intersection_dir)
             
             feature_intersection_df[["chrom", "start", "end"]].to_csv(output_intersection_fname, sep="\t", index=False, header=False)
+            
+            # Liftover the PIR files (here from hg38 to hg19)
+            if self.chainfile:
+                print(f"Lifting over {tag} PIR intersections using {self.chainfile}") 
+                
+                liftover_dir = os.path.join(self.output_dir, "PIR_intersection_liftover")
+                
+                # Perform liftOver on the bedtools object 
+                lifted = feature_intersection_sort.liftover(self.chainfile, unmapped=None) 
+                
+                # Converted lifted coordinates to data frame
+                lifted_feature_intersection_df = lifted.to_dataframe()
+                
+                # Save the results
+                liftover_intersection_fname = os.path.join(liftover_dir, f"{self.basename}_PIR_intersect_{tag}_hg19.bed")
+                lifted_feature_intersection_df[["chrom", "start", "end"]].to_csv(liftover_intersection_fname, sep="\t", index=False, header=False)
 
     def _import_gene_counts_(self):
         self.gene_counts = pd.read_csv(self.gene_expression, sep="\t", header=0, names=["GeneName", "Expression"])
@@ -304,14 +298,6 @@ class ChicagoData(object):
         
         for _, tag in self.features_to_count.items():
             self.gene_counts[f"{tag}_count"] = self.gene_counts["GeneName"].map(self.df.groupby(["baitName"]).sum()[tag])
-
-    def _map_ABC_counts_to_genes_(self):        
-        for _, tag in self.features_to_count.items():
-            tmp = self.df[self.df["ABC_label"] == "ABC"]
-            
-            self.gene_counts[f"{tag}_ABC_count"] = self.gene_counts["GeneName"].map(tmp.groupby(["baitName"]).sum()[tag])
-
-            self.gene_counts[f"{tag}_CHiCAGO_count"] = self.gene_counts[f"{tag}_count"] - self.gene_counts[f"{tag}_ABC_count"]
 
     def _get_dir_(self, dir: str, permissions=0o0775, exist_ok : bool=True):
         """Makes a directory at the given location
