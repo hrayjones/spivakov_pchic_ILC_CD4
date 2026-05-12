@@ -1,5 +1,6 @@
 # Human Tonsil ILC3 pcHi-C Analysis with RNA-seq
 
+# TODO: double check output folder and scripts. then check peaks, qc, reli and rna. Modify readme.
 ___
 
 ## Overview
