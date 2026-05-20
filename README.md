@@ -1,4 +1,4 @@
-# Human Tonsil ILC3 pCHi-C Analysis: Prepare input files for [RELI](https://github.com/WeirauchLab/RELI)
+# Human Tonsil ILC3 pCHi-C Analysis: Run [RELI](https://github.com/WeirauchLab/RELI)
 ___
 
 ## Overview
@@ -22,13 +22,18 @@ The analysis for each data type is described below:
 
 The `./data` diretory contains the input and output data produced with this repository. See the [data directry readme](./data/readme.md) for detailed description of files.
 
-### [`./notebooks`](./notebooks)
+### [`./scripts`](./scripts)
 
-The notebooks directory contains the jupyter notebook used to perform the analysis. This notebook was used interactively to generate the inputs for RELI. The process was as follows:
+The scripts directory contains the jupyter notebook used to generate RELI input, and the scripts used to run RELI. 
+
+script **Prepare_RELI_inputs_final.ipynb**
 - The PIR sets were the union of PCHi-C interactions (CHiCAGO score ≥ 5, binned to 5 kb or DpnII fragment-level resolution) and  ABCC enhancers, excluding any trans-chromosomal interactions.
 - Regulatory elements (RE) were then defined as the union of peaks of open chromatin and H3K27ac in ILC3 and CD4+ T cells (using ATAC-seq and ChIP-seq data as above).
 - The true intersection between these regulatory elements and PIRs in each cell type was then determined using pybedtools intersect.
 - The coordinates for these regions were lifted over from hg38 to hg19 using UCSC liftOver (v. 377), then sorted and merged for use with RELI.
+
+Additional scripts within **run_RELI**
+These scripts were used to run RELI itself. For more information, please see the [RELI repository](https://github.com/WeirauchLab/RELI)
 
 ### [`./python`](./python)
 
