@@ -14,7 +14,8 @@ The analysis for each data type is described below:
 3. [`RNA-seq Analysis`](docs/rnaseq.md)
 4. [`pcHi-C Analysis`](docs/pchic.md)
 5. [`pcHi-C integrated with RNA-seq`](docs/expression_analysis.md)
-6. [`Feature intersections prepared for RELI input`](notebooks/Prepare_RELI_inputs_final.ipynb)
+6. [`Feature intersections prepared for RELI input`](scripts/Prepare_RELI_inputs_final.ipynb)
+7. [`Run RELI`](scripts/run_RELI)
 
 ## Directory Description
 
