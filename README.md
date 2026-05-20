@@ -33,7 +33,7 @@ script **Prepare_RELI_inputs_final.ipynb**
 - The coordinates for these regions were lifted over from hg38 to hg19 using UCSC liftOver (v. 377), then sorted and merged for use with RELI.
 
 Additional scripts within **run_RELI**
-These scripts were used to run RELI itself. For more information, please see the [RELI repository](https://github.com/WeirauchLab/RELI)
+- These scripts were used to run RELI itself. For more information, please see the [RELI repository](https://github.com/WeirauchLab/RELI)
 
 ### [`./python`](./python)
 
